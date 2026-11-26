@@ -134,15 +134,7 @@ void setup() {
   pinMode(pinRGB_R, OUTPUT);
   pinMode(pinRGB_G, OUTPUT);
   pinMode(pinRGB_B, OUTPUT);
-
-  // Prueba del LED RGB al encender: rojo, verde y azul, medio segundo cada uno.
-  // Si algun color no prende, revisar ese cable y su resistencia.
-  ponerColor(255, 0, 0);
-  delay(500);
-  ponerColor(0, 255, 0);
-  delay(500);
-  ponerColor(0, 0, 255);
-  delay(500);
+  
   ponerColor(0, 0, 0);   // LED apagado.
 
   // Lleva el servo al centro y luego lo desconecta para que no vibre en reposo.
