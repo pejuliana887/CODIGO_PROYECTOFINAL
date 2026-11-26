@@ -1,5 +1,5 @@
 // =====================================================================
-//                         CAJA MUSICAL CON ARDUINO
+//                         CAJA MUSICAL CON ARDUINO HOLA HOLA 
 //  Juliana Sofia Perez, Sofia Zarate, Gabriela Cepeda.
 //
 //  Cada disco tiene un sticker RFID. Al acercarlo al lector RC522, el
