@@ -174,13 +174,9 @@ void setup() {
   Serial.println(F("Pulsador: corto = pausa/reanudar, 1 s = reiniciar. Volumen: potenciometro"));
   Serial.println(F("Monitor serie: p = pausa, r = reanudar, l = ver lectura del LDR"));
 
-  // Con LDR, la caja empieza dormida hasta que alguien se acerque.
-  // Sin LDR, la caja empieza despierta.
-  if (USAR_LDR) {
+  // La caja empieza dormida hasta que alguien se acerque.
     dormirCaja();
-  } else {
-    despertarCaja();
-  }
+
 }
 
 
@@ -258,9 +254,6 @@ void loop() {
 // Entonces cuando alguien se acerca y le hace sombra, la lectura es mayor
 // que la luz del salon.
 void revisarLuz() {
-
-  // Si no se esta usando el LDR, no hace nada.
-  if (!USAR_LDR) return;
 
   // Lee el LDR cada 200 ms (no hace falta leerlo en cada vuelta).
   if (millis() - ultimaLecturaLuz < 200) return;
