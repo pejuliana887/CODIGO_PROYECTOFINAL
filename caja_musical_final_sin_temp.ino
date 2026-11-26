@@ -130,7 +130,7 @@ void setup() {
   Serial.begin(9600);
 
   // Configuracion de los pines digitales como entradas o salidas.
-  pinMode(pinPulsador, INPUT_PULLUP);
+  pinMode(pinPulsador, INPUT_PULLUP); //presionado es LOW
   pinMode(pinRGB_R, OUTPUT);
   pinMode(pinRGB_G, OUTPUT);
   pinMode(pinRGB_B, OUTPUT);
@@ -456,20 +456,20 @@ void revisarMensajeTemporal() {
 //  PULSADOR: corto = pausa/reanudar, largo (1 s) = reiniciar cancion
 // =====================================================================
 bool botonAntes = HIGH;               // Estado anterior del pulsador (HIGH = suelto).
-unsigned long ultimoCambioBoton = 0;  // Para evitar rebotes del pulsador.
-unsigned long inicioPresion = 0;      // Momento en que se empezo a presionar.
-bool largoHecho = false;              // true si ya se hizo la accion de presion larga.
+unsigned long ultimoCambioBoton = 0;  // Momento del último cambio aceptado, para el antirrebote
+unsigned long inicioPresion = 0;      // Momento en que se empezó a presionar, para medir si pasó 1 s
+bool largoHecho = false;              // true si ya se ejecutó la acción de presión larga
 
 void leerPulsador() {
-  bool ahora = digitalRead(pinPulsador);
+  bool ahora = digitalRead(pinPulsador); // Lee el estado actual del pin
 
-  // Detecta un cambio en el pulsador (ignora cambios de menos de 30 ms = rebotes).
+  // Detecta un cambio de estado y exige que hayan pasado más de 30 ms desde el último cambio aceptado
   if (ahora != botonAntes && millis() - ultimoCambioBoton > 30) {
-    ultimoCambioBoton = millis();
-    botonAntes = ahora;
+    ultimoCambioBoton = millis(); // Anota el momento del cambio
+    botonAntes = ahora; //actualiza el estado anterior
 
     if (ahora == LOW) {
-      // Se acaba de presionar: empieza a contar el tiempo.
+      // Se acaba de presionar, se empieza a contar el tiempo.
       inicioPresion = millis();
       largoHecho = false;
     } else if (!largoHecho) {
@@ -485,17 +485,17 @@ void leerPulsador() {
   }
 }
 
-void pausarOReanudar() {
+void pausarOReanudar() { // Si la caja está dormida, avisa por serial y sale
   if (!cajaActiva) {
     Serial.println(F("La caja esta dormida."));
     return;
   }
-  ultimaActividad = millis();
+  ultimaActividad = millis(); // Usar el botón cuenta como actividad
 
-  if (discoActual < 0) {
+  if (discoActual < 0) { //Si no hay disco
     Serial.println(F("Primero pon un disco."));
     lcdEscribir("Primero pon", "un disco");
-    mensajeHasta = millis() + 1500;
+    mensajeHasta = millis() + 1500; // el mensaje se quite 1,5 s después
     return;
   }
 
@@ -508,7 +508,7 @@ void pausarOReanudar() {
     pausado = true;
     Serial.println(F("Pausa"));
   }
-  lineaEstado();
+  lineaEstado(); // la línea 2 de la LCD para que cambie entre Sonando y Pausa
 }
 
 void reiniciarCancion() {
@@ -627,7 +627,7 @@ void moverServo() {
   bool debeBailar = (discoActual >= 0) && !pausado && (volumenActual > 0);
 
   if (!debeBailar) {
-    // Si estaba bailando, la regresa al centro.
+    // Si estaba bailando, lo manda al centro, lo marca como inactivo y programa su desconexión 400 ms después.
     if (servoActivo) {
       figura.write(CENTRO);
       servoActivo = false;
@@ -641,7 +641,7 @@ void moverServo() {
     return;
   }
 
-  // Si va a empezar a bailar, conecta el servo.
+  // Si va a empezar a bailar, conecta el servo, lo marca como activo, cancela cualquier desconexión 
   if (!servoActivo) {
     figura.attach(pinServo);
     servoActivo = true;
@@ -649,18 +649,18 @@ void moverServo() {
     ultimoPasoServo = 0;
   }
 
-  // Volumen -> velocidad: entre 600 ms (volumen bajo) y 200 ms (volumen alto).
+  // Calcula cada cuántos ms se mueve, a volumen 1 da 600 ms (lento) y a volumen 15 da 200 ms (rápido).
   // Se usa millis() en vez de delay() para que el resto del sistema siga funcionando.
   int intervalo = map(volumenActual, 1, VOLUMEN_MAX, 600, 200);
-  if (millis() - ultimoPasoServo < (unsigned long)intervalo) return;  // Todavia no toca moverse.
+  if (millis() - ultimoPasoServo < (unsigned long)intervalo) return;  // Si todavía no pasó el tiempo de espera entre pasos del servo, sale sin moverlo; solo continúa cuando ya toca el siguiente movimiento.
   ultimoPasoServo = millis();
 
-  // Volumen -> amplitud: entre 10 y 60 grados hacia cada lado.
+  // Calcula cuántos grados se aleja del centro, 10° a volumen 1 y 60° a volumen 15
   int amplitud = map(volumenActual, 1, VOLUMEN_MAX, 10, AMPLITUD_MAX);
 
-  // Cambia de lado en cada paso: derecha, izquierda, derecha...
+  // true pasa a false y viceversa, para alternar en cada paso
   servoLado = !servoLado;
-  if (servoLado) {
+  if (servoLado) { // Según el lado, va a 90 + amplitud o a 90 - amplitud 
     figura.write(CENTRO + amplitud);
   } else {
     figura.write(CENTRO - amplitud);
