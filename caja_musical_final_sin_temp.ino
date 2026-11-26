@@ -277,7 +277,6 @@ void revisarLuz() {
 // Si la caja esta despierta, no suena musica y pasaron 20 s sin que
 // nadie haga nada, la caja se duerme.
 void revisarSiDormir() {
-  if (!USAR_LDR) return;     // Sin LDR la caja nunca se duerme.
   if (!cajaActiva) return;
 
   bool sonando = (discoActual >= 0) && !pausado;
