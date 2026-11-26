@@ -26,27 +26,32 @@
 // ---------------------------------------------------------------------
 //  2. Tabla de discos
 // ---------------------------------------------------------------------
-// Cada disco guarda: el UID de su sticker RFID, el numero de la cancion en
-// la microSD, el nombre que se muestra en la LCD y el color del LED RGB
-// (rojo, verde, azul, cada uno de 0 a 255).
 struct Disco {
-  const char* uid;      // Codigo del sticker RFID.
-  int cancion;          // Numero del archivo en la microSD (0001.mp3, 0002.mp3...).
+  const char* uid;      // Codigo de la tarjeta RFID.
+  int cancion;          // Numero del archivo en la microSD (0001.mp3, 0002.mp3, 0003.mp3, etc).
   const char* nombre;   // Nombre que se muestra en la pantalla.
   int rojo;             // Color del LED RGB para esta cancion.
   int verde;
   int azul;
 };
 
+// Cada fila de esta tabla representa un disco y guarda cuatro datos:
+//   1. uid:     codigo unico de la tarjeta RFID del disco.
+//   2. cancion: numero del archivo en la microSD (0001.mp3 = 1, 0002.mp3 = 2, etc).
+//   3. nombre:  texto que se muestra en la pantalla LCD.
+//   4. color:   color del LED RGB para ese disco, indicado con tres valores (rojo, verde, azul).
+
 Disco discos[] = {
-  { "41 0e 2B 16", 1, "Piel Canela - Andres Cepeda",         255,  80,   0 },  // tarjeta 1: naranja
+  { "41 0E 2B 16", 1, "Piel Canela - Andres Cepeda",         255,  80,   0 },  // tarjeta 1: naranja
   { "41 31 86 16", 2, "maggots for brains - Olivia Rodrigo", 150,   0, 255 },  // tarjeta 2: morado
   { "71 C4 9F 15", 3, "iPod Touch - Ninajirachi",              0, 200, 255 },  // tarjeta 3: azul claro
   { "E0 61 73 5F", 4, "Volcan - Jose Jose",                  255,   0,   0 },  // tarjeta 4: rojo
   { "83 CF D2 56", 5, "That Way - Katseye",                  255,   0, 120 },  // tarjeta 5: rosado
 };
 
-// Calcula automaticamente cuantos discos hay en la tabla.
+// Calcula automaticamente cuantos discos hay en la tabla al dividir 
+// el tamaño total de la tabla entre el tamaño de un solo disco.
+// Así, si se agregan o quitan discos, este numero se actualiza solo.
 int NUM_DISCOS = sizeof(discos) / sizeof(discos[0]);
 
 
@@ -165,7 +170,6 @@ void setup() {
   leerPotenciometro(true);
 
   // Calibracion del LDR: mide la luz normal del salon al encender.
-  // (No tapar el sensor mientras el Arduino arranca.)
   luzAmbiente = analogRead(pinLDR);
   Serial.print(F("Luz del salon (referencia): "));
   Serial.println(luzAmbiente);
@@ -585,11 +589,15 @@ void uidATexto(char* salida) {
   }
 }
 
-// Busca el UID en la tabla de discos. Devuelve su posicion o -1 si no esta.
-// strcasecmp compara sin importar mayusculas/minusculas ("0e" = "0E").
+// Busca el UID de la tarjeta en la tabla de discos al recorre la tabla fila por fila 
+// y compara el UID leido con el de cada disco.
+// strcmp devuelve 0 cuando los dos textos son exactamente iguales, y si encuentra 
+// el disco, devuelve su posicion en la tabla (0, 1, 2...), si no lo encuentra, 
+// devuelve -1, que significa tarjeta no registrada.
+
 int buscarDisco(const char* uid) {
   for (int i = 0; i < NUM_DISCOS; i++) {
-    if (strcasecmp(uid, discos[i].uid) == 0) return i;
+    if (strcmp(uid, discos[i].uid) == 0) return i;
   }
   return -1;
 }
