@@ -249,8 +249,7 @@ void loop() {
 //  SENSOR DE LUZ (LDR): despertar y dormir la caja
 // =====================================================================
 
-// Conexion: el LDR va entre A2 y GND, y la resistencia va entre A2 y 5V.
-// Asi, con menos luz la resistencia del LDR aumenta y la lectura SUBE.
+// Por conexión realizada, con menos luz la resistencia del LDR aumenta y la lectura SUBE.
 // Entonces cuando alguien se acerca y le hace sombra, la lectura es mayor
 // que la luz del salon.
 void revisarLuz() {
