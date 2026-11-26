@@ -161,7 +161,7 @@ void setup() {
   }
   delay(200);
 
-  // Lee el volumen inicial del potenciometro.
+  // Lee el volumen una vez al encender
   leerPotenciometro(true);
 
   // Calibracion del LDR: mide la luz normal del salon al encender.
@@ -189,7 +189,7 @@ void loop() {
   revisarLuz();              // Revisa si alguien se acerca (LDR).
   revisarSiDormir();         // Duerme la caja si nadie la esta usando.
   leerPulsador();            // Pausa / reanudar / reiniciar.
-  leerPotenciometro(false);  // Volumen.
+  leerPotenciometro(false);  // Se llama a leer el volumen en cada vuelta del loop()
   revisarMensajeTemporal();  // Quita los mensajes temporales de la LCD.
   moverTitulo();             // Corre el nombre de la cancion hacia la izquierda.
   moverServo();              // Hace bailar la figura.
@@ -539,33 +539,32 @@ void reiniciarCancion() {
 // =====================================================================
 unsigned long ultimaLecturaPot = 0;
 
-void leerPotenciometro(bool forzar) {
+void leerPotenciometro(bool forzar) { //forzar: true obliga a leer y aplicar el volumen sin condiciones, y false es el modo normal
 
-  // Lee el potenciometro cada 150 ms (salvo que se fuerce la lectura).
+  // si no se está forzando y todavía no pasaron 150 ms desde la última lectura, sale de la función sin hacer nada
   if (!forzar && millis() - ultimaLecturaPot < 150) return;
-  ultimaLecturaPot = millis();
+  ultimaLecturaPot = millis(); //anota el momento de esta lectura para el siguiente conteo
 
-  int lectura = analogRead(pinPotenciometro);
+  int lectura = analogRead(pinPotenciometro); //Convierte el voltaje en un número de o a 1023
 
-  // Divide el recorrido del potenciometro en partes iguales de 0 a VOLUMEN_MAX.
-  // (Se usa 1024 y VOLUMEN_MAX + 1 para que si llegue al volumen maximo.)
+  //Divide el recorrido del potenciometro en partes iguales de 0 a VOLUMEN_MAX
+  //Se usa 1024 y VOLUMEN_MAX + 1 para que si llegue al volumen maximo
   int nuevo = map(lectura, 0, 1024, 0, VOLUMEN_MAX + 1);
 
-  // Solo cambia el volumen si el potenciometro se movio lo suficiente,
-  // para que el numero no salte entre dos valores.
+  //cambio es true solo si el volumen calculado es distinto del actual y la perilla se movió más de 30 unidades, para que el volumen no parpadee por pequeñas variaciones.
   bool cambio = (nuevo != volumenActual) &&
                 (abs(lectura - map(volumenActual, 0, VOLUMEN_MAX, 0, 1023)) > 30);
-
+  //se aplica el volumen si se pide en setup, es menor a 0, el potenciómetro se movió de verdad
   if (forzar || volumenActual < 0 || cambio) {
     volumenActual = nuevo;
-    dfp.volume(volumenActual);
-    Serial.print(F("Volumen: "));
+    dfp.volume(volumenActual); //Le ordena al DFPlayer ese volumen
+    Serial.print(F("Volumen: ")); //Muestra el volumen en el monitor serie
     Serial.println(volumenActual);
 
     if (!forzar) {
-      ultimaActividad = millis();   // Mover el volumen tambien cuenta como actividad.
+      ultimaActividad = millis();   //si el cambio de volumen lo hizo una persona, anota la hora, para que la caja no se duerma.
     }
-    if (discoActual >= 0 && millis() >= mensajeHasta) {
+    if (discoActual >= 0 && millis() >= mensajeHasta) { //Si hay un disco y no hay un mensaje temporal en pantalla, actualiza en la LCD el volumen y el estado.
       lineaEstado();
     }
   }
