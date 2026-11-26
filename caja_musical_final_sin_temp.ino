@@ -1,3 +1,15 @@
+// =====================================================================
+//                         CAJA MUSICAL CON ARDUINO
+//  Juliana Sofia Perez, Sofia Zarate, Gabriela Cepeda.
+//
+//  Cada disco tiene un sticker RFID. Al acercarlo al lector RC522, el
+//  DFPlayer reproduce la cancion de ese disco, la LCD muestra el nombre y
+//  el volumen, el LED RGB se enciende con el color de la cancion y la
+//  figura (servomotor) baila al ritmo del volumen.
+//  La caja empieza "dormida" y se despierta cuando la fotorresistencia (LDR)
+//  detecta la sombra de alguien que se acerca.
+// =====================================================================
+
 
 
 
