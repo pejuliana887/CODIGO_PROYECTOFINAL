@@ -88,11 +88,6 @@ int VELOCIDAD_TEXTO = 400;   // Cada cuantos ms se corre el titulo una letra a l
 unsigned long TIEMPO_DORMIR = 20000;  // Si en 20 s nadie hace nada y no suena musica,
                                       // la caja se vuelve a dormir.
 
-// true = la caja se duerme y se despierta con el LDR.
-// false = la caja queda siempre despierta (sirve para probar sin el LDR).
-bool USAR_LDR = true;
-
-
 // ---------------------------------------------------------------------
 //  6. Objetos de las librerias
 // ---------------------------------------------------------------------
